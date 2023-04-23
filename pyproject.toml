@@ -6,6 +6,10 @@ authors = ["Ivo <ivo.van.der.zeyst@pon.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
+pandas = "^2.0.0"
+pyarrow = "^11.0.0"
+requests = "^2.28.2"
+loguru = "^0.7.0"
 
 [tool.poetry.dev-dependencies]
 
