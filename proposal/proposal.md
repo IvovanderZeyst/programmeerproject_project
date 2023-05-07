@@ -67,6 +67,8 @@ a tool in the form of a web app that takes a more orientation and purchase based
 - Implement saved filter page
 - Toggle view on find bike, save bike and save filter view
 - Buy bike button  for different outlets that executes search on the selected site to try and find one for sale
+- Add stepwise bike suggester
+- Store finder
 
 #### Must haves
 
@@ -81,11 +83,13 @@ a tool in the form of a web app that takes a more orientation and purchase based
 - Bookmark filter settings
 - Implement favorite bike page
 - Implement saved filter page
+- Add stepwise bike suggester
 
 #### Nice to haves
 
 - Toggle view on find bike, save bike and save filter view
 - Buy bike button  for different outlets that executes search on the selected site to try and find one for sale
+- Store finder
 
 ## Requirements
 
