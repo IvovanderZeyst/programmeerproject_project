@@ -20,15 +20,12 @@ The parse_data method parses bike data from the provided dictionary.
 """
 import json
 import uuid
-from typing import Dict
 
-import pandas as pd
+
 import requests
 from loguru import logger
 
-#from modules \
 import data_extraction_constants
-#from modules \
 from data_extraction_dataframe_parser import *
 
 
