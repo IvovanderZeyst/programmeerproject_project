@@ -28,7 +28,6 @@ from loguru import logger
 
 from data_extraction_class import DataExtraction
 
-
 def create_output_folders():
     """Create several output folders where the CSV files will be saved if they
         do not exist already."""

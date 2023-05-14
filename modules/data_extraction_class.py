@@ -63,8 +63,6 @@ class DataExtraction:
 
         self.cursor_count = 0
 
-        print(self.username)
-        print(self.password)
 
     def build_full_url(self):
         """Builds the full URL for the API request, including query parameters.
