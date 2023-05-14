@@ -30,8 +30,8 @@ from data_extraction_class import DataExtraction
 
 # TODO Implement this properly later
 def create_output_folders():
-    #Create several output folders where the CSV files will be saved if they
-        #do not exist already.
+    """Create several output folders where the CSV files will be saved if they
+        do not exist already."""
     print(os.getcwd())
     if not os.path.exists("../data_files/models/"):
         try:
