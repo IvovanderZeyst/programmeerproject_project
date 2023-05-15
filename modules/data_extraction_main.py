@@ -10,11 +10,6 @@ The script creates several output folders if they do not exist already, where
 the CSV files will be saved.
 The script uses the `os` module to interact with the file system.
 
-The script also uses the `sentry_sdk` module to log errors and exceptions in
-the application and send them to Sentry.io.
-The configuration parameters for Sentry.io are stored in the `parameters`
-module.
-
 The script imports several modules, including `json`, `uuid`, `typing`,
 `pandas`, `requests`, `loguru`.
 
@@ -71,8 +66,8 @@ if __name__ == "__main__":
     extraction = DataExtraction(
         base_url="https://api.99spokes.com/v1/bikes",
         query_params=query_params,
-        username=os.environ.get("USERNAME"),
-        password=os.environ.get("PASSWORD")
+        username=os.environ.get("API_USERNAME"),
+        password=os.environ.get("API_PASSWORD")
     )
 
     write_result = True
@@ -80,16 +75,33 @@ if __name__ == "__main__":
         create_output_folders()
 
     while cursor is not None:
-        data = extraction.fetch_data(
-            parse_to_self=write_result, keep_trying_if_500_error=True
-        )
-        cursor = data["nextCursor"]
-        extraction.set_cursor(cursor, increase_cursor_count=True)
-        logger.info(f"Successfully retrieved page {extraction.cursor_count!r}")
-        if write_result:
-            extraction.dataframes_to_parquet()
+        try:
+            data = extraction.fetch_data(
+                parse_to_self=write_result, keep_trying_if_500_error=True
+            )
+            cursor = data["nextCursor"]
+            extraction.set_cursor(cursor, increase_cursor_count=True)
+            logger.info(f"Successfully retrieved page "
+                        f"{extraction.cursor_count!r}")
+
+            if write_result:
+                extraction.dataframes_to_csv()
+
+        except:
+            logger.info("API error, continue")
+            break
 
     logger.info(
         f"Finished extracting API with {extraction.cursor_count!r} pages"
         f" of {limit!r} items"
+    )
+
+    logger.info(
+        f"Start writing to database"
+    )
+
+    extraction.csv_to_sql()
+
+    logger.info(
+        f"Ended writing to database"
     )

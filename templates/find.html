@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Login
+{% endblock %}
+
+{% block main %}
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">model_id</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in bikes %}
+                <tr>
+                    <td>{{ bikes.model_id }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

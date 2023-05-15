@@ -18,8 +18,10 @@ The fetch_data method sends a GET request to the API and returns the response
     data as a Python object.
 The parse_data method parses bike data from the provided dictionary.
 """
+import os
 import json
 import uuid
+import psycopg2
 
 
 import requests
@@ -101,8 +103,10 @@ class DataExtraction:
         - amount (int): The amount to decrease the limit parameter by.
         """
         new_limit = int(self.query_params.get("limit", 0)) - amount
+
         if new_limit <= 0:
             raise ValueError(f"Limit cannot be <= 0. Limit was {new_limit!r}")
+
         self.query_params["limit"] = str(new_limit)
 
     def fetch_data(
@@ -371,7 +375,8 @@ class DataExtraction:
                 "parse_to_self=True to resolve"
             )
 
-        # Convert each dataframe to Parquet format and save in respective folders
+        # Convert each dataframe to Parquet format and save in respective
+        # folders
         uuid_str = str(uuid.uuid4())
         self.models_table.to_parquet(
             f"../data_files/models/{self.cursor_count}-models"
@@ -440,8 +445,40 @@ class DataExtraction:
         )
         pass
 
-    # TODO Implement this later
-    """
-    data to postgres
-    build incremental mechanism
-    """
+    def db_connection(self):
+        conn = psycopg2.connect(
+            host="localhost",
+            database="postgres",
+            user=os.environ.get("DB_USERNAME"),
+            password=os.environ.get("DB_PASSWORD")
+        )
+
+        return conn
+
+    def csv_to_sql(self):
+
+        conn = self.db_connection()
+        cur = conn.cursor()
+
+        full_path = os.getcwd().replace("modules", "data_files")
+
+        tables = ["models", "analysis", "price_history", "prices"]
+
+        for item in tables:
+            for filename in os.listdir(f"{full_path}/{item}/"):
+
+                f = f"{full_path}/{item}/{filename}"
+
+                cur.execute(f"""
+                    COPY public.{item}
+                    FROM '{f}'
+                    DELIMITER ','
+                    CSV
+                    HEADER;
+                """)
+
+                os.remove(f"{f}")
+
+        conn.commit()
+        cur.close()
+        conn.close()

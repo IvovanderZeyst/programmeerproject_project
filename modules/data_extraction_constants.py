@@ -5,7 +5,7 @@ ANALYSIS_TABLE_MAPPING = {
         'quotechar': '"'
     },
     'id': {
-        'rename_col_to': 'analysis_id',
+        'rename_col_to': 'id',
         'data_type': 'string'
     },
     'model_id': {
@@ -41,7 +41,7 @@ ANALYSIS_TABLE_MAPPING = {
         'data_type': 'float'
     },
     'seatpost': {
-        'rename_col_to': 'seatpost',
+        'rename_col_to': 'seat_post',
         'data_type': 'float'
     },
     'forkMaterial': {
@@ -49,7 +49,7 @@ ANALYSIS_TABLE_MAPPING = {
         'data_type': 'float'
     },
     'forkrank': {
-        'rename_col_to': 'forkrank',
+        'rename_col_to': 'fork_rank',
         'data_type': 'float'
     },
     'valueProp': {
@@ -171,7 +171,7 @@ PRICES_TABLE_MAPPING = {
         'quotechar': '"'
     },
     'id': {
-        'rename_col_to': 'price_id',
+        'rename_col_to': 'id',
         'data_type': 'string'
     },
     'model_id': {

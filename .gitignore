@@ -1,3 +1,4 @@
 .idea
 *.parquet
+*.csv
 data_files
