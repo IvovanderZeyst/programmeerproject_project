@@ -1,24 +1,193 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Login
+    BikeFinder
 {% endblock %}
 
 {% block main %}
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th scope="col">model_id</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for row in bikes %}
-                <tr>
-                    <td>{{ bikes.model_id }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+  <style>
+    .filter {
+      margin-bottom: 10px;
+    }
+    .filter label {
+      display: block;
+      font-weight: bold;
+    }
+    .filter .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .filter .dropdown-content {
+      display: none;
+      position: absolute;
+      z-index: 1;
+      padding: 5px;
+      background-color: #f9f9f9;
+      border: 1px solid #ccc;
+      max-height: 150px;
+      overflow-y: auto;
+        min-width: 100%;
+    }
+    .filter .dropdown-content label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    .filter .dropdown:hover .dropdown-content {
+      display: block;
+    }
+    .filter input[type="checkbox"] {
+      margin-right: 5px;
+    }
+    .model {
+      margin-bottom: 5px;
+    }
+
+    .models-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      margin: -10px;
+    }
+
+    .model {
+      width: calc(25% - 20px);
+      margin: 10px;
+      padding: 20px;
+      border: 1px solid #ccc;
+    }
+
+  </style>
+
+    <div class="filter">
+        <label for="filter-category">Category filter</label>
+            <div class="dropdown">
+                <input type="text" placeholder="Select category" readonly>
+                <div class="dropdown-content" id="filter-category">
+                    <label><input type="checkbox" value="all" checked>All</label>
+                    {% for row in categories %}
+                        <label><input type="checkbox" value="{{ row[0] }}">{{ row[0] }}</label>
+                    {% endfor %}
+                </div>
+            </div>
+    </div>
+
+    <div class="filter">
+        <label for="filter-sub-category">Subcategory filter</label>
+            <div class="dropdown">
+                <input type="text" placeholder="Select subcategory" readonly>
+                <div class="dropdown-content" id="filter-sub-category">
+                    <label><input type="checkbox" value="all" checked>All</label>
+                    {% for row in sub_categories %}
+                        <label><input type="checkbox" value="{{ row[0] }}">{{ row[0] }}</label>
+                    {% endfor %}
+                </div>
+            </div>
+    </div>
+
+ <div class="filter">
+    <label for="spec-value">Spec level range</label>
+    <div id="spec-value">
+      <input type="range" id="filter-min-spec-values" min="0" max="100"
+             value="0">
+      <input type="range" id="filter-max-spec-values" min="0" max="100"
+             value="100">
+    </div>
+    <div id="spec-values">
+      Min spec value <span id="min-spec-value">0</span> - Max spec value <span
+            id="max-spec-value">100</span>
+    </div>
+  </div>
+
+    <div id="models" class="models-container">
+        {% for row in data %}
+            <div id="model"
+                 class="model {{ row.category }} {{ row.sub_category }}" data-spec-level="50">
+                <div>
+                    <p><b>Category: </b>{{ row.category }}</p>
+                    <p><b>Subcategory: </b>{{ row.sub_category }}</p>
+                    <p><b>Manufacturer: </b>{{ row.maker_id }}</p>
+                    <p><b>Model Family: </b>{{ row.family }}</p>
+                    <p><b>Model: </b>{{ row.model }}</p>
+                    <p><b>Gender: </b>{{ row.gender }}</p>
+                    <p><b>Year released: </b>{{ row.year }}</p>
+                    <br>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        const filterCategory = document.getElementById('filter-category');
+        const filterSubCategory =
+            document.getElementById('filter-sub-category');
+        const filterMinSpecValue =
+            document.getElementById('filter-min-spec-values');
+        const filterMaxSpecValue =
+            document.getElementById('filter-max-spec-values');
+        const valueMinSpecValue = document.getElementById('min-spec-value');
+        const valueMaxSpecValue = document.getElementById('max-spec-value');
+
+        filterCategory.addEventListener('change', filterCheckboxChange);
+        filterSubCategory.addEventListener('change', filterCheckboxChange);
+        filterMinSpecValue.addEventListener('input', filterModels);
+        filterMaxSpecValue.addEventListener('input', filterModels);
+
+        function filterCheckboxChange(event) {
+          const targetCheckbox = event.target;
+          const dropdownContent = targetCheckbox.closest('.dropdown-content');
+          const checkboxes = dropdownContent.querySelectorAll('input[type="checkbox"]:not([value="all"])');
+
+          if (targetCheckbox.value === 'all') {
+            checkboxes.forEach(function (checkbox) {
+              checkbox.checked = targetCheckbox.checked;
+            });
+          } else {
+            if (!targetCheckbox.checked) {
+                const allCheckbox = dropdownContent.querySelector('input[type="checkbox"][value="all"]');
+                allCheckbox.checked = false;
+            } else {
+                const checkedCount = dropdownContent.querySelectorAll('input[type="checkbox"]:checked:not([value="all"])').length;
+                const allCheckbox = dropdownContent.querySelector('input[type="checkbox"][value="all"]');
+                allCheckbox.checked = checkedCount === checkboxes.length;
+            }
+          }
+
+          filterModels();
+        }
+
+        function filterModels() {
+            const categoryValue = Array.from(filterCategory.getElementsByTagName('input')).filter(input => input.checked && input.value !== 'all').map(input => input.value);
+            const subCategoryValue = Array.from(filterSubCategory.getElementsByTagName('input')).filter(input => input.checked && input.value !== 'all').map(input => input.value);
+            const minSpecValue = parseFloat(filterMinSpecValue.value);
+            const maxSpecValue = parseFloat(filterMaxSpecValue.value);
+
+            const modelElements = document.getElementsByClassName('model');
+
+            for (let i = 0; i < modelElements.length; i++) {
+                const models = modelElements[i];
+                const category = categoryValue.length === 0 || categoryValue.some(category => category === '' || models.classList.contains(category));
+                const subCategory = subCategoryValue.length === 0 || subCategoryValue.some(subCategory => subCategory === '' || models.classList.contains(subCategory));
+                const specLevel =
+                    parseFloat(models.getAttribute('data-spec-level'));
+
+                if (category && subCategory && specLevel >= minSpecValue && specLevel <= maxSpecValue) {
+                    models.style.display = 'block';
+                } else {
+                    models.style.display = 'none';
+                }
+            }
+        }
+
+        filterMinSpecValue.addEventListener('input', function() {
+            valueMinSpecValue.textContent = filterMinSpecValue.value;
+        });
+
+        filterMaxSpecValue.addEventListener('input', function() {
+            valueMaxSpecValue.textContent = filterMaxSpecValue.value;
+        });
+
+        filterModels();
+    </script>
 
 {% endblock %}

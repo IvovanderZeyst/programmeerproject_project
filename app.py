@@ -1,8 +1,11 @@
 import os
+import pprint
+
 from flask import Flask, render_template, request, session, redirect, url_for
 from flask_login import LoginManager, UserMixin, login_required, login_user, \
     current_user, logout_user, fresh_login_required
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text, inspect
 from flask_session import Session
 from urllib.parse import urlparse, urljoin
 from psycopg2 import *
@@ -44,6 +47,7 @@ class Models(db.Model):
     is_frameset = db.Column(db.Boolean)
     is_ebike = db.Column(db.Boolean)
     gender = db.Column(db.String(100))
+
 
 class Analysis(db.Model):
     id = db.Column(db.String, primary_key=True)
@@ -147,7 +151,23 @@ def create_app():
 
     @app.route("/find")
     def find():
-        bikes = Models.query.all()
-        return render_template("find.html", bikes=bikes)
+
+        data = db.session.query(Models).filter(Models.is_frameset is not None).filter(Models.sub_category is not None).limit(1000).all()
+
+        categories = db.session.query(Models.category.distinct()).filter(Models.is_frameset is not None).filter(Models.sub_category is not None).order_by(Models.category.asc()).all()
+
+        sub_categories = db.session.query(Models.sub_category.distinct()).filter(Models.is_frameset is not None).filter(Models.sub_category is not None).order_by(Models.sub_category.asc()).all()
+
+        gender = db.session.query(Models.gender.distinct()).filter(Models.is_frameset is not None).filter(Models.sub_category is not None).order_by(Models.gender.asc()).all()
+
+        return render_template("find.html", data=data,
+                               categories=categories,
+                               sub_categories=sub_categories,
+                               gender=gender)
 
     return app
+
+
+if __name__ == "__main__":
+    app = create_app()
+    app.run()
